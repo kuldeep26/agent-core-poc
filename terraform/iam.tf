@@ -24,17 +24,7 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Effect = "Allow",
         Action = [
-          "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
-        ],
-        Resource = "*"
-      },
-
-      {
-        Effect = "Allow",
-        Action = [
-          "bedrock:GetInferenceProfile",
-          "bedrock:ListInferenceProfiles"
+          "bedrock:*"
         ],
         Resource = "*"
       },
@@ -45,6 +35,14 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
           "lambda:InvokeFunction"
         ],
         Resource = "*"
+      },
+
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:PassRole"
+        ],
+        Resource = aws_iam_role.bedrock_agent_role.arn
       }
     ]
   })
