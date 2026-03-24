@@ -24,12 +24,7 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Effect = "Allow",
         Action = [
-          "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream",
-          "bedrock:GetInferenceProfile",
-          "bedrock:ListInferenceProfiles",
-          "bedrock:Retrieve",
-          "bedrock:RetrieveAndGenerate"
+          "bedrock:*",
         ],
         Resource = "*"
       },
@@ -119,8 +114,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
       {
         Effect = "Allow",
         Action = [
-          "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
+          "bedrock:*",
         ],
         Resource = "*"
       }
