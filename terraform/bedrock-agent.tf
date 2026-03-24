@@ -1,7 +1,7 @@
 resource "aws_bedrockagent_agent" "platform_agent" {
   agent_name              = "platform-ops-agent"
   agent_resource_role_arn = aws_iam_role.bedrock_agent_role.arn
-  foundation_model        = "anthropic.claude-3-7-sonnet-20250219-v1:0"
+  foundation_model        = "anthropic.claude-sonnet-4-5-20250929-v1:0"
 
   instruction = <<PROMPT
 You are an AWS Platform Operations Agent.
