@@ -10,7 +10,6 @@ terraform {
   backend "s3" {
     bucket         = "abc-us-east-1-terraform-state-bucket"
     key            = "agent-core/terraform.tfstate"
-    region        = var.region
   }
 }
 
