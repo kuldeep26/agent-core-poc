@@ -13,16 +13,36 @@ resource "aws_iam_role" "bedrock_agent_role" {
   })
 }
 
-resource "aws_iam_role_policy" "bedrock_policy" {
+resource "aws_iam_role_policy" "bedrock_agent_policy" {
+  name = "bedrock-agent-policy"
   role = aws_iam_role.bedrock_agent_role.id
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
+
+      {
+        Effect = "Allow",
+        Action = [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream"
+        ],
+        Resource = "*"
+      },
+
       {
         Effect = "Allow",
         Action = [
           "lambda:InvokeFunction"
+        ],
+        Resource = "*"
+      },
+
+      {
+        Effect = "Allow",
+        Action = [
+          "bedrock:Retrieve",
+          "bedrock:RetrieveAndGenerate"
         ],
         Resource = "*"
       }
