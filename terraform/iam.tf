@@ -32,6 +32,15 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Effect = "Allow",
         Action = [
+          "aws-marketplace:ViewSubscriptions",
+          "aws-marketplace:Subscribe"
+        ],
+        Resource = "*"
+      },
+
+      {
+        Effect = "Allow",
+        Action = [
           "lambda:InvokeFunction"
         ],
         Resource = "*"
