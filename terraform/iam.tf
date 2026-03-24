@@ -132,6 +132,6 @@ resource "aws_iam_role_policy" "lambda_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "marketplace" {
-  role       = aws_iam_role.bedrock_agent_role.id
+  role       = aws_iam_role.bedrock_agent_role.name
   policy_arn = "arn:aws:iam::aws:policy/AWSMarketplaceFullAccess"
 }
