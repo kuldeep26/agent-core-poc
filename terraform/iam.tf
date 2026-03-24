@@ -33,7 +33,8 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Effect = "Allow",
         Action = [
-          "lambda:InvokeFunction"
+          "bedrock:GetInferenceProfile",
+          "bedrock:ListInferenceProfiles"
         ],
         Resource = "*"
       },
@@ -41,8 +42,7 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Effect = "Allow",
         Action = [
-          "bedrock:Retrieve",
-          "bedrock:RetrieveAndGenerate"
+          "lambda:InvokeFunction"
         ],
         Resource = "*"
       }
