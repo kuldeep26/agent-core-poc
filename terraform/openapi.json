@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Agent Core Tools",
+    "version": "1.0"
+  },
+  "paths": {
+    "/restart_pipeline": {
+      "post": {
+        "operationId": "restart_sagemaker_pipeline",
+        "responses": {
+          "200": {
+            "description": "Restart pipelines"
+          }
+        }
+      }
+    },
+    "/stop_idle_endpoint": {
+      "post": {
+        "operationId": "stop_idle_endpoint",
+        "responses": {
+          "200": {
+            "description": "Stop endpoints"
+          }
+        }
+      }
+    },
+    "/check_s3_public": {
+      "post": {
+        "operationId": "check_s3_public_access",
+        "responses": {
+          "200": {
+            "description": "Check S3"
+          }
+        }
+      }
+    },
+    "/cost_report": {
+      "post": {
+        "operationId": "generate_cost_report",
+        "responses": {
+          "200": {
+            "description": "Cost report"
+          }
+        }
+      }
+    },
+    "/compliance": {
+      "post": {
+        "operationId": "generate_compliance_report",
+        "responses": {
+          "200": {
+            "description": "Compliance"
+          }
+        }
+      }
+    },
+    "/alert": {
+      "post": {
+        "operationId": "send_alert",
+        "responses": {
+          "200": {
+            "description": "Send alert"
+          }
+        }
+      }
+    }
+  }
+}

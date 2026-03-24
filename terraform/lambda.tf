@@ -22,3 +22,10 @@ resource "aws_lambda_function" "agent_core" {
     }
   }
 }
+
+resource "aws_lambda_permission" "allow_bedrock" {
+  statement_id  = "AllowBedrockInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.agent_core.function_name
+  principal     = "bedrock.amazonaws.com"
+}
