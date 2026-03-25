@@ -12,5 +12,5 @@ variable "teams_webhook" {
 variable "foundation_model" {
   description = "Foundation model ID or inference profile ARN used by the Bedrock agent"
   type        = string
-  default     = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+  default     = "arn:aws:bedrock:us-east-1:282698011778:application-inference-profile/7f0y5vvjhwb4"
 }
