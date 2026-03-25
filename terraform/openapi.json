@@ -1,68 +1,161 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.0",
   "info": {
     "title": "Agent Core Tools",
-    "version": "1.0"
+    "version": "1.0.0",
+    "description": "Action group API for platform operations tasks invoked by Amazon Bedrock Agents"
   },
   "paths": {
     "/restart_pipeline": {
       "post": {
+        "description": "Restart a SageMaker pipeline by name.",
         "operationId": "restart_sagemaker_pipeline",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pipeline_name": {
+                    "type": "string",
+                    "description": "Name of the SageMaker pipeline to restart"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Restart pipelines"
+            "description": "Pipeline restart request accepted"
           }
-        }
+        },
+        "x-requireConfirmation": "DISABLED"
       }
     },
     "/stop_idle_endpoint": {
       "post": {
+        "description": "Stop an idle SageMaker endpoint.",
         "operationId": "stop_idle_endpoint",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "endpoint_name": {
+                    "type": "string",
+                    "description": "Endpoint name to stop"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Stop endpoints"
+            "description": "Endpoint stop request accepted"
           }
-        }
+        },
+        "x-requireConfirmation": "DISABLED"
       }
     },
     "/check_s3_public": {
       "post": {
+        "description": "Check whether an S3 bucket allows public access.",
         "operationId": "check_s3_public_access",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bucket_name": {
+                    "type": "string",
+                    "description": "Bucket to inspect"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Check S3"
+            "description": "Bucket access check completed"
           }
-        }
+        },
+        "x-requireConfirmation": "DISABLED"
       }
     },
     "/cost_report": {
       "post": {
+        "description": "Generate an AWS cost report for an account.",
         "operationId": "generate_cost_report",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "account_id": {
+                    "type": "string",
+                    "description": "AWS account ID to report on"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Cost report"
+            "description": "Cost report generated"
           }
-        }
+        },
+        "x-requireConfirmation": "DISABLED"
       }
     },
     "/compliance": {
       "post": {
+        "description": "Generate a compliance report.",
         "operationId": "generate_compliance_report",
         "responses": {
           "200": {
-            "description": "Compliance"
+            "description": "Compliance report generated"
           }
-        }
+        },
+        "x-requireConfirmation": "DISABLED"
       }
     },
     "/alert": {
       "post": {
+        "description": "Send an operations alert notification.",
         "operationId": "send_alert",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "alert_type": {
+                    "type": "string",
+                    "description": "Alert category or severity"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Send alert"
+            "description": "Alert sent"
           }
-        }
+        },
+        "x-requireConfirmation": "DISABLED"
       }
     }
   }
