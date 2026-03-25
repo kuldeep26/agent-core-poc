@@ -2,6 +2,7 @@ resource "aws_bedrockagent_agent" "platform_agent" {
   agent_name              = "platform-ops-agent"
   agent_resource_role_arn = aws_iam_role.bedrock_agent_role.arn
   foundation_model        = "arn:aws:bedrock:us-east-1:282698011778:application-inference-profile/7f0y5vvjhwb4"
+  prepare_agent           = true
 
   instruction = <<PROMPT
 You are an AWS Platform Operations Agent.
@@ -29,4 +30,24 @@ Default behavior:
 Never delete resources.
 Never modify IAM policies.
 PROMPT
+}
+
+resource "aws_bedrockagent_agent_action_group" "platform_ops_tools" {
+  agent_id          = aws_bedrockagent_agent.platform_agent.id
+  agent_version     = "DRAFT"
+  action_group_name = "platform-ops-tools"
+
+  api_schema {
+    payload = file("${path.module}/openapi.json")
+  }
+
+  action_group_executor {
+    lambda = aws_lambda_function.agent_core.arn
+  }
+}
+
+resource "aws_bedrockagent_agent_alias" "platform_agent_alias" {
+  agent_alias_name = "live"
+  agent_id         = aws_bedrockagent_agent.platform_agent.id
+  description      = "Alias used by clients to invoke the platform ops agent"
 }
