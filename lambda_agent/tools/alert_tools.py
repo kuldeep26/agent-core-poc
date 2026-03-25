@@ -8,10 +8,11 @@ http = urllib3.PoolManager()
 
 def send_teams_message(message, action_result=None):
     """Send message to Microsoft Teams via webhook"""
-    webhook_url = os.environ.get("TEAMS_WEBHOOK_URL")
+    # Support both variable names to avoid breaking existing Terraform/env setups.
+    webhook_url = os.environ.get("TEAMS_WEBHOOK_URL") or os.environ.get("TEAMS_WEBHOOK")
     
     if not webhook_url:
-        logger.error("TEAMS_WEBHOOK_URL not set in environment variables")
+        logger.error("Teams webhook env var not set (expected TEAMS_WEBHOOK_URL or TEAMS_WEBHOOK)")
         return False
     
     # MessageCard format (simpler than AdaptiveCard)
