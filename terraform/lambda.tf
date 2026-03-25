@@ -15,10 +15,8 @@ resource "aws_lambda_function" "agent_core" {
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   environment {
-  variables = {
-    TEAMS_WEBHOOK = var.teams_webhook
-    AGENT_ID      = aws_bedrockagent_agent.platform_agent.id
-    AGENT_ALIAS_ID = "TSTALIASID"
+    variables = {
+      TEAMS_WEBHOOK = var.teams_webhook
     }
   }
 }
@@ -28,4 +26,5 @@ resource "aws_lambda_permission" "allow_bedrock" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.agent_core.function_name
   principal     = "bedrock.amazonaws.com"
+  source_arn    = aws_bedrockagent_agent.platform_agent.arn
 }
