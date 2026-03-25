@@ -7,6 +7,24 @@ from tools.alert_tools import send_teams_message
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+API_PATH_TO_ACTION = {
+    "/restart_pipeline": "restart_sagemaker_pipeline",
+    "/stop_idle_endpoint": "stop_idle_endpoint",
+    "/check_s3_public": "check_s3_public_access",
+    "/cost_report": "generate_cost_report",
+    "/compliance": "generate_compliance_report",
+    "/alert": "send_alert",
+}
+
+
+def _notification_text(action_name, action_input, result):
+    if action_name == "send_alert":
+        alert_type = (action_input or {}).get("alert_type")
+        return f"Alert notification: {alert_type}" if alert_type else "Alert notification sent"
+
+    status_text = result.get("status") if isinstance(result, dict) else None
+    return status_text or f"Action executed: {action_name}"
+
 
 def process_action(action_name, action_input):
     """Process an agent action and send result to Teams."""
@@ -32,7 +50,8 @@ def process_action(action_name, action_input):
     else:
         raise ValueError(f"Unsupported action: {action_name}")
 
-    send_teams_message(f"Action executed: {action_name}", result)
+    notification_payload = {"action": action_name, **result}
+    send_teams_message(_notification_text(action_name, action_input, result), notification_payload)
     return result
 
 
@@ -45,20 +64,67 @@ def _bedrock_parameters_to_dict(parameters):
     return action_input
 
 
+def _bedrock_request_body_to_dict(request_body):
+    action_input = {}
+    content = (request_body or {}).get("content", {})
+
+    for media_type in content.values():
+        for prop in media_type.get("properties", []):
+            name = prop.get("name")
+            if name:
+                action_input[name] = prop.get("value")
+
+    return action_input
+
+
+def _resolve_action_and_input(event):
+    # Function-details schema
+    if event.get("function"):
+        return event.get("function"), _bedrock_parameters_to_dict(event.get("parameters"))
+
+    # API schema (OpenAPI action groups)
+    if event.get("apiPath"):
+        action_name = API_PATH_TO_ACTION.get(event.get("apiPath"))
+        action_input = _bedrock_request_body_to_dict(event.get("requestBody"))
+        return action_name, action_input
+
+    return None, {}
+
+
 def _format_bedrock_response(event, result):
+    response_body = json.dumps(result)
+
+    # Function-details schema response
+    if event.get("function"):
+        return {
+            "messageVersion": event.get("messageVersion", "1.0"),
+            "response": {
+                "actionGroup": event.get("actionGroup", "platform-ops-tools"),
+                "function": event.get("function"),
+                "functionResponse": {
+                    "responseBody": {"TEXT": {"body": response_body}}
+                },
+            },
+            "sessionAttributes": event.get("sessionAttributes", {}),
+            "promptSessionAttributes": event.get("promptSessionAttributes", {}),
+        }
+
+    # OpenAPI action group schema response
     return {
         "messageVersion": event.get("messageVersion", "1.0"),
         "response": {
             "actionGroup": event.get("actionGroup", "platform-ops-tools"),
-            "function": event.get("function"),
-            "functionResponse": {
-                "responseBody": {
-                    "TEXT": {
-                        "body": json.dumps(result)
-                    }
+            "apiPath": event.get("apiPath"),
+            "httpMethod": event.get("httpMethod", "POST"),
+            "httpStatusCode": 200,
+            "responseBody": {
+                "application/json": {
+                    "body": response_body,
                 }
-            }
-        }
+            },
+        },
+        "sessionAttributes": event.get("sessionAttributes", {}),
+        "promptSessionAttributes": event.get("promptSessionAttributes", {}),
     }
 
 
@@ -67,9 +133,11 @@ def lambda_handler(event, context):
     logger.info("Event: %s", json.dumps(event))
 
     try:
-        if isinstance(event, dict) and event.get("function"):
-            action_name = event.get("function")
-            action_input = _bedrock_parameters_to_dict(event.get("parameters"))
+        if isinstance(event, dict) and (event.get("function") or event.get("apiPath")):
+            action_name, action_input = _resolve_action_and_input(event)
+            if not action_name:
+                raise ValueError(f"Unsupported apiPath: {event.get('apiPath')}")
+
             result = process_action(action_name, action_input)
             return _format_bedrock_response(event, result)
 
