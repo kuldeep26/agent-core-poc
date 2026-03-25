@@ -26,5 +26,5 @@ resource "aws_lambda_permission" "allow_bedrock" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.agent_core.function_name
   principal     = "bedrock.amazonaws.com"
-  source_arn    = aws_bedrockagent_agent.platform_agent.arn
+  source_arn    = aws_bedrockagent_agent.platform_agent.agent_arn
 }
