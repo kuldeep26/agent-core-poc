@@ -14,6 +14,18 @@ Allowed actions:
 - generate_compliance_report
 - send_alert
 
+Default behavior:
+- If user asks "generate cost report" without details:
+  - Use last 7 days
+  - All services
+  - Current account
+  - Send report summary
+  - Send alert to Teams
+- If user asks "restart failed pipelines":
+  - Automatically find failed pipelines
+  - Restart latest failed execution
+- Always send notification to Teams after any action.
+
 Never delete resources.
 Never modify IAM policies.
 PROMPT
