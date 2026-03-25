@@ -1,7 +1,7 @@
 resource "aws_bedrockagent_agent" "platform_agent" {
   agent_name              = "platform-ops-agent"
   agent_resource_role_arn = aws_iam_role.bedrock_agent_role.arn
-  foundation_model        = "arn:aws:bedrock:us-east-1:282698011778:application-inference-profile/7f0y5vvjhwb4"
+  foundation_model        = var.foundation_model
   prepare_agent           = true
 
   instruction = <<PROMPT
