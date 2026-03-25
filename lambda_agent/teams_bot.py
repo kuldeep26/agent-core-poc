@@ -13,7 +13,7 @@ bedrock_agent = boto3.client("bedrock-agent-runtime")
 
 AGENT_ID = os.environ.get("AGENT_ID")
 AGENT_ALIAS_ID = os.environ.get("AGENT_ALIAS_ID")
-TEAMS_WEBHOOK = os.environ.get("TEAMS_WEBHOOK")
+TEAMS_WEBHOOK = os.environ.get("TEAMS_WEBHOOK") or os.environ.get("TEAMS_WEBHOOK_URL")
 
 
 def _extract_user_message(event):

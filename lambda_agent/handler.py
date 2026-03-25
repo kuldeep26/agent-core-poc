@@ -69,10 +69,29 @@ def _bedrock_request_body_to_dict(request_body):
     content = (request_body or {}).get("content", {})
 
     for media_type in content.values():
-        for prop in media_type.get("properties", []):
-            name = prop.get("name")
-            if name:
-                action_input[name] = prop.get("value")
+        properties = media_type.get("properties", {})
+        if isinstance(properties, list):
+            for prop in properties:
+                name = prop.get("name")
+                if name:
+                    action_input[name] = prop.get("value")
+            continue
+
+        if isinstance(properties, dict):
+            for name, prop in properties.items():
+                if isinstance(prop, dict) and "value" in prop:
+                    action_input[name] = prop.get("value")
+
+        body = media_type.get("body")
+        if isinstance(body, str):
+            try:
+                parsed_body = json.loads(body)
+            except json.JSONDecodeError:
+                parsed_body = {}
+            if isinstance(parsed_body, dict):
+                action_input.update(parsed_body)
+        elif isinstance(body, dict):
+            action_input.update(body)
 
     return action_input
 
@@ -91,7 +110,7 @@ def _resolve_action_and_input(event):
     return None, {}
 
 
-def _format_bedrock_response(event, result):
+def _format_bedrock_response(event, result, status_code=200):
     response_body = json.dumps(result)
 
     # Function-details schema response
@@ -116,7 +135,7 @@ def _format_bedrock_response(event, result):
             "actionGroup": event.get("actionGroup", "platform-ops-tools"),
             "apiPath": event.get("apiPath"),
             "httpMethod": event.get("httpMethod", "POST"),
-            "httpStatusCode": 200,
+            "httpStatusCode": status_code,
             "responseBody": {
                 "application/json": {
                     "body": response_body,
@@ -136,7 +155,8 @@ def lambda_handler(event, context):
         if isinstance(event, dict) and (event.get("function") or event.get("apiPath")):
             action_name, action_input = _resolve_action_and_input(event)
             if not action_name:
-                raise ValueError(f"Unsupported apiPath: {event.get('apiPath')}")
+                error_result = {"error": f"Unsupported apiPath: {event.get('apiPath')}"}
+                return _format_bedrock_response(event, error_result, status_code=400)
 
             result = process_action(action_name, action_input)
             return _format_bedrock_response(event, result)
@@ -155,6 +175,8 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Unsupported event payload"}),
         }
     except Exception as exc:
-        error_response = {"statusCode": 500, "error": str(exc)}
+        error_response = {"status": "error", "error": str(exc)}
         send_teams_message("ERROR: Bedrock agent action failed", error_response)
-        return error_response
+        if isinstance(event, dict) and (event.get("function") or event.get("apiPath")):
+            return _format_bedrock_response(event, error_response, status_code=500)
+        return {"statusCode": 500, "body": json.dumps(error_response)}
