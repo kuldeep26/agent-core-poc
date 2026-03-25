@@ -3,7 +3,13 @@ variable "region" {
 }
 
 variable "teams_webhook" {
-    description = "Microsoft Teams Webhook URL for notifications"
-    type        = string
-    default     = "update_teams_webhook_url_manually in lambda environment variables"
+  description = "Microsoft Teams Webhook URL for notifications"
+  type        = string
+}
+
+
+variable "foundation_model" {
+  description = "Foundation model ID or inference profile ARN used by the Bedrock agent"
+  type        = string
+  default     = "anthropic.claude-3-5-sonnet-20241022-v2:0"
 }
