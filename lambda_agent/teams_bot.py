@@ -13,7 +13,51 @@ bedrock_agent = boto3.client("bedrock-agent-runtime")
 
 AGENT_ID = os.environ.get("AGENT_ID")
 AGENT_ALIAS_ID = os.environ.get("AGENT_ALIAS_ID")
-TEAMS_WEBHOOK = os.environ.get("TEAMS_WEBHOOK")
+TEAMS_WEBHOOK = os.environ.get("TEAMS_WEBHOOK") or os.environ.get("TEAMS_WEBHOOK_URL")
+
+
+def _extract_user_message(event):
+    """Extract user text from API Gateway or native Lambda payloads."""
+    body = event.get("body") if isinstance(event, dict) else None
+
+    if isinstance(body, str):
+        try:
+            payload = json.loads(body)
+        except json.JSONDecodeError:
+            payload = {"text": body}
+    elif isinstance(body, dict):
+        payload = body
+    elif isinstance(event, dict):
+        payload = event
+    else:
+        payload = {}
+
+    # Teams/Bot Framework commonly sends `text`; some clients use `message`.
+    user_message = payload.get("message") or payload.get("text")
+    if not user_message:
+        return None
+
+    # Remove bot mention wrappers like <at>BotName</at>
+    cleaned = re.sub(r"<at>.*?</at>", "", user_message, flags=re.IGNORECASE).strip()
+    return cleaned or None
+
+
+def _extract_completion_text(response):
+    """Collect text chunks from Bedrock streaming response."""
+    completion = ""
+
+    for event in response.get("completion", []):
+        chunk = event.get("chunk") if isinstance(event, dict) else None
+        if not chunk:
+            continue
+
+        raw_bytes = chunk.get("bytes")
+        if isinstance(raw_bytes, (bytes, bytearray)):
+            completion += raw_bytes.decode("utf-8", errors="ignore")
+        elif isinstance(raw_bytes, str):
+            completion += raw_bytes
+
+    return completion.strip()
 
 
 def _extract_user_message(event):
